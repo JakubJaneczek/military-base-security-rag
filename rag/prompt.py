@@ -1,0 +1,1 @@
+# Generator promptów dla LLM

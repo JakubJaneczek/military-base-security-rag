@@ -1,0 +1,1 @@
+# Interfejs CLI - zapytania użytkownika

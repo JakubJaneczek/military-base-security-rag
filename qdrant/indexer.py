@@ -1,0 +1,1 @@
+# Wstawianie danych do Qdrant

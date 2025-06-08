@@ -1,0 +1,1 @@
+# Obsługa zapytań SQL

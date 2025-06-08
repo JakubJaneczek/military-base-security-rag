@@ -1,0 +1,1 @@
+# Szukanie embeddingów w Qdrant

@@ -1,0 +1,1 @@
+# Simulacja IoT - Kafka producer
