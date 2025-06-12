@@ -5,16 +5,19 @@ import random
 from datetime import datetime
 from kafka import KafkaProducer
 from faker import Faker
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
 
 fake = Faker()
-
 # Konfiguracja Kafka
 KAFKA_TOPIC = "base_security_events"
 KAFKA_SERVER = "localhost:29092"
 
 producer = KafkaProducer(
-    bootstrap_servers=KAFKA_SERVER,
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    bootstrap_servers=['localhost:29092'],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    api_version=(3, 4, 0) 
 )
 
 # Możliwe dane wejściowe
@@ -33,7 +36,7 @@ devices = ["sensor_A1", "sensor_B2", "sensor_C3", "motion_sensor_D1", "audio_sen
 
 severities = ["low", "medium", "high"]
 
-print(f"⏳ Start symulacji – publikacja na topic '{KAFKA_TOPIC}'")
+print(f"Start symulacji - publikacja na topic '{KAFKA_TOPIC}'", flush=True)
 
 try:
     while True:
@@ -51,12 +54,12 @@ try:
         }
 
         producer.send(KAFKA_TOPIC, message)
-        print(f"✅ Wysłano zdarzenie: {message['event_type']} ({message['zone']})")
+        print(f"Wysłano zdarzenie: {message['event_type']} ({message['zone']})", flush=True)
 
         time.sleep(random.uniform(1.0, 3.0))
 
 except KeyboardInterrupt:
-    print("🛑 Zatrzymano symulację.")
+    print("Zatrzymano symulację.", flush=True)
 finally:
     producer.flush()
     producer.close()

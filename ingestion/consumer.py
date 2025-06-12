@@ -7,6 +7,9 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
 from datetime import datetime
 import uuid
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
 
 # Konfiguracja
 KAFKA_TOPIC = "base_security_events"
@@ -39,41 +42,46 @@ consumer = KafkaConsumer(
     group_id="base_ingestor"
 )
 
-print(f"🔁 Subskrybowanie topicu: {KAFKA_TOPIC}")
+print(f"Subskrybowanie topicu: {KAFKA_TOPIC}", flush=True)
 
-for msg in consumer:
-    data = msg.value
-    print(f"📥 Otrzymano zdarzenie: {data['event_type']} w {data['zone']}")
+try:
+    for msg in consumer:
+        print("Odebrano wiadomość z Kafki...", flush=True)
+        data = msg.value
+        print(f"Zdarzenie: {data['event_type']} w {data['zone']}", flush=True)
 
-    # --- ZAPIS DO POSTGRESQL (dane strukturalne) ---
-    insert_query = """
-        INSERT INTO events (timestamp, device_id, zone, event_type, event_value, severity, description)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """
-    pg_cursor.execute(insert_query, (
-        data["timestamp"],
-        data["device_id"],
-        data["zone"],
-        data["event_type"],
-        str(data["event_value"]),
-        data["severity"],
-        data["description"]
-    ))
-    pg_conn.commit()
+        # --- ZAPIS DO POSTGRESQL (dane strukturalne) ---
+        insert_query = """
+            INSERT INTO events (timestamp, device_id, zone, event_type, event_value, severity, description)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        pg_cursor.execute(insert_query, (
+            data["timestamp"],
+            data["device_id"],
+            data["zone"],
+            data["event_type"],
+            str(data["event_value"]),
+            data["severity"],
+            data["description"]
+        ))
+        pg_conn.commit()
 
-    # --- ZAPIS DO QDRANT (embedding + semantyczny payload) ---
-    embedding_input = data["description"]
-    vector = model.encode(embedding_input).tolist()
+        # --- ZAPIS DO QDRANT (embedding + semantyczny payload) ---
+        embedding_input = data["description"]
+        vector = model.encode(embedding_input).tolist()
 
-    payload = {
-        "description": data["description"],
-        "event_type": data["event_type"]
-    }
+        payload = {
+            "description": data["description"],
+            "event_type": data["event_type"]
+        }
 
-    point = PointStruct(
-        id=str(uuid.uuid4()),
-        vector=vector,
-        payload=payload
-    )
+        point = PointStruct(
+            id=str(uuid.uuid4()),
+            vector=vector,
+            payload=payload
+        )
 
-    qdrant.upsert(collection_name=COLLECTION_NAME, points=[point])
+        qdrant.upsert(collection_name=COLLECTION_NAME, points=[point])
+
+except Exception as e:
+    print(f"Błąd: {e}", flush=True)

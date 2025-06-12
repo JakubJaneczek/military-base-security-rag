@@ -73,7 +73,7 @@ response = requests.post(LLM_API_URL, json={
 # --- Wyświetlenie odpowiedzi ---
 if response.status_code == 200:
     answer = response.json()["choices"][0]["message"]["content"]
-    print("\n📤 Odpowiedź modelu:")
+    print("\nOdpowiedź modelu:")
     print(answer)
 else:
-    print(f"❌ Błąd {response.status_code}: {response.text}")
+    print(f"Błąd {response.status_code}: {response.text}")
