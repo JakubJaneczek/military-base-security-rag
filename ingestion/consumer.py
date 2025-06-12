@@ -1,4 +1,8 @@
-# Kafka consumer - zapis do Qdrant i PostgreSQL
+"""
+ingestion/consumer.py
+Cel: Konsument Apache Kafka – odbiera dane i zapisuje je do PostgreSQL i Qdrant.
+"""
+
 import json
 import psycopg2
 from kafka import KafkaConsumer
@@ -9,13 +13,14 @@ from datetime import datetime
 import uuid
 import sys
 
+# Buforowanie natychmiastowe dla Windowsa
 sys.stdout.reconfigure(line_buffering=True)
 
-# Konfiguracja
+# --- Konfiguracja ---
 KAFKA_TOPIC = "base_security_events"
 KAFKA_SERVER = "localhost:29092"
 
-# PostgreSQL
+# Połączenie z PostgreSQL
 pg_conn = psycopg2.connect(
     dbname="basedata",
     user="baseuser",
@@ -25,14 +30,14 @@ pg_conn = psycopg2.connect(
 )
 pg_cursor = pg_conn.cursor()
 
-# Qdrant
+# Połączenie z Qdrant
 qdrant = QdrantClient(host="localhost", port=6333)
 COLLECTION_NAME = "base_events"
 
-# Model embeddingów
+# Załadowanie modelu do generowania embeddingów
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Kafka consumer
+# Inicjalizacja Kafka consumer
 consumer = KafkaConsumer(
     KAFKA_TOPIC,
     bootstrap_servers=KAFKA_SERVER,
@@ -75,6 +80,7 @@ try:
             "event_type": data["event_type"]
         }
 
+        # Wstawienie punktu wektorowego z unikalnym identyfikatorem
         point = PointStruct(
             id=str(uuid.uuid4()),
             vector=vector,
