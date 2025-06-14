@@ -13,7 +13,7 @@ Projekt systemu monitorowania bezpieczeństwa bazy wojskowej, wykorzystujący:
 ## 📦 Wymagania
 
 - Windows 11 / Linux
-- Python 3.10+
+- Python 3.10 (nie działa na 3.13, inne wersje nietestowane)
 - Docker + Docker Compose
 - [LM Studio](https://lmstudio.ai) z załadowanym modelem wspierającym OpenAI API (w projekcie wykorzystany mistral-7b-instruct-v0.2)
 
@@ -29,12 +29,12 @@ cd military-base-security-rag
 
 2. Stwórz środowisko i zainstaluj zależności:
 ```bash
-python -m venv venv
+python3.10 -m venv venv
 venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-3. Uruchom kontenery:
+3. Uruchom Docker Desktop i stwórz kontenery:
 ```bash
 cd docker
 docker compose up -d
@@ -57,11 +57,12 @@ Uruchom aplikację graficzną:
 ```bash
 python gui_launcher.py
 ```
+Po uruchoieniu aplikacji mogą pobierać się dodatkowe zależności, należy poczekać na ich zakończenie.
 
 Dostępne zakładki:
-- **Symulacja** – uruchamia producer (publikuje zdarzenia do Kafki)
-- **Ingestor** – uruchamia consumer (zapisuje do PostgreSQL i Qdrant)
-- **RAG** – zadajesz pytanie → model generuje odpowiedź na podstawie danych
+- **Symulacja** – uruchamia producer (publikuje zdarzenia do Kafki); powinna wyświetlać informacje o zapisie zdarzenia.
+- **Ingestor** – uruchamia consumer (zapisuje do PostgreSQL i Qdrant); powinna wyświetlac informacje o odebraniu zdarzenia.
+- **RAG** – zadajesz pytanie → model generuje odpowiedź na podstawie danych; powinien zachęcać użytkownika do zadania pytania i wyświetlać uzyskaną odpowiedź.
 
 ---
 
